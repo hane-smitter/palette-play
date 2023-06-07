@@ -1,0 +1,50 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.buckle {
+  border: 2px solid #888888;
+  border-radius: 5px;
+}
+
+.color-container {
+  display: grid;
+  grid-auto-flow: column;
+  padding: 20px 5px;
+}
+
+.color-container > div {
+  width: 300px;
+}
+.color-container > :first-child {
+  border-right: 2px solid #888888;
+  padding-right: 5px;
+  margin-right: 5px;
+}
+
+.color-input-box,
+.color-result-box {
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.color-input-box input {
+  font-size: 14px;
+}
+.color-input-box input:focus {
+  outline-offset: 5px;
+}
+.color-result-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.color-result {
+  width: 200px;
+  height: 200px;
+}
