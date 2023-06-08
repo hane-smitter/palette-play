@@ -6,10 +6,12 @@ const LeftSide = ({ colorValue, setColorValue }) => {
   return (
     <div>
       <div className="color-input-box">
-        <label for="color-val">Enter a color:&nbsp;&nbsp;&nbsp;</label>
+        <label htmlFor="color-val" className="contrast">
+          Enter a color:&nbsp;&nbsp;&nbsp;
+        </label>
         <br />
         <input
-          type="text"
+          type="color"
           name="color-value"
           id="color-val"
           value={colorValue}
@@ -18,7 +20,7 @@ const LeftSide = ({ colorValue, setColorValue }) => {
       </div>
       <div className="color-result-box">
         <div
-          className="color-result"
+          className="color-result buckle"
           style={{ backgroundColor: `${colorValue}` }}
         ></div>
       </div>
