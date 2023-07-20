@@ -19,12 +19,13 @@ body {
 
 .color-container {
   display: grid;
-  grid-auto-flow: column;
+  /* grid-auto-flow: column; */
+  grid-template-columns: 1fr 2fr;
   padding: 20px 5px;
 }
 
 .color-container > div {
-  width: 300px;
+  min-width: 300px;
 }
 .color-container > :first-child {
   border-right: 2px solid #888888;
@@ -72,4 +73,96 @@ body {
 
 input[type="color"] {
   cursor: pointer;
+}
+
+.btn {
+  border: 2px solid darkgray;
+  padding: 4px 10px;
+  font-weight: 700;
+  background-color: #dde8f1;
+  color: black;
+  cursor: pointer;
+  transition: transform 50ms ease-in;
+}
+.btn:active {
+  transform: scale(0.92);
+}
+.btn:focus {
+  border-color: maroon;
+  outline: none;
+}
+.btn:disabled {
+  background-color: #afadad;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.row {
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  text-align: start;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid rgb(2, 150, 196);
+}
+
+caption {
+  padding: 20px;
+  font-style: italic;
+  caption-side: top;
+  color: #303030;
+  text-align: right;
+  letter-spacing: 1px;
+}
+
+thead th {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+thead th:nth-child(1) {
+  width: 20%;
+}
+
+thead th:nth-child(2) {
+  width: 60%;
+}
+
+thead th:nth-child(3) {
+  width: 20%;
+}
+
+th,
+td {
+  padding: 10px;
+}
+
+tbody tr:nth-child(even) {
+  background-color: rgba(190, 51, 255, 0.04);
+}
+
+tbody tr:nth-child(odd) {
+  background-color: rgba(190, 51, 255, 0.152);
+}
+
+tbody tr th,
+tbody tr td:not(:last-of-type) {
+  border-right: 2px solid rgb(2, 150, 196);
+}
+
+/* td {
+  letter-spacing: 1px;
+} */
+
+tbody td {
+  text-align: center;
+}
+
+tfoot th {
+  text-align: right;
 }

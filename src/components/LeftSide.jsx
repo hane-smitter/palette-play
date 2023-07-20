@@ -11,7 +11,7 @@ const LeftSide = ({ colorValue, setColorValue }) => {
         </label>
         <br />
         <input
-          type="color"
+          // type="color"
           name="color-value"
           id="color-val"
           value={colorValue}

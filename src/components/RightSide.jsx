@@ -1,102 +1,42 @@
-import { useState, useRef } from "react";
-import { alpha, darken, lighten } from "@mui/material/styles";
+import { useState, useRef, useCallback } from "react";
+import Color from "color";
+import Mixers from "./Mixers";
 
 const RightSide = ({ colorValue, setColorValue }) => {
-  const txtDisplay = useRef(null);
-  const [rangeVal, setRangeVal] = useState(0);
-  const [manipulation, setManipulation] = useState("darken");
-  const colorFunctions = {
-    alpha,
-    darken,
-    lighten,
-  };
+  const [, triggerRender] = useState(false);
+  const manipulatedColor = useRef(Color(colorValue).hsl().string());
 
-  function handleColorChange(event) {
-    setRangeVal(event.target.value);
-    txtDisplay.current && (txtDisplay.current.innerText = event.target.value);
-  }
-
-  function handleRadioChange(event) {
-    setManipulation(event.target?.value);
-    // console.log("value:  ", event.target?.value);
-  }
-
-  function processColor(colorManipulator) {
-    return colorFunctions[colorManipulator](colorValue, rangeVal);
-  }
+  const colorUpdater = useCallback((color) => {
+    manipulatedColor.current = color;
+    triggerRender((prev) => !prev);
+  }, []);
 
   return (
     <div>
       <div className="color-input-box">
-        <div className="radio-btns" style={{ width: "100%" }}>
-          <input
-            type="radio"
-            name="manipulationMode"
-            id="manipulationChoice1"
-            value="darken"
-            onChange={handleRadioChange}
-            checked={Object.is(manipulation, "darken")}
-          />
-          <label htmlFor="manipulationChoice1" className="contrast">
-            Blacken
-          </label>
-
-          <input
-            type="radio"
-            name="manipulationMode"
-            id="manipulationChoice2"
-            value="lighten"
-            onChange={handleRadioChange}
-            checked={Object.is(manipulation, "lighten")}
-          />
-          <label htmlFor="manipulationChoice2" className="contrast">
-            Whiten
-          </label>
-
-          <input
-            type="radio"
-            name="manipulationMode"
-            id="manipulationChoice3"
-            value="alpha"
-            onChange={handleRadioChange}
-            checked={Object.is(manipulation, "alpha")}
-          />
-          <label htmlFor="manipulationChoice3" className="contrast">
-            Alpha
-          </label>
-        </div>
-
-        <label htmlFor="color" className="contrast">
-          Slide:&nbsp;&nbsp;&nbsp;
-        </label>
-        <input
-          type="range"
-          name="color-range"
-          id="color"
-          min={0}
-          max={1}
-          step={0.01}
-          value={rangeVal}
-          onChange={handleColorChange}
-        />
+        <Mixers colorValue={colorValue} colorUpdater={colorUpdater} />
       </div>
       <div className="color-result-box">
         <div
           className="color-result buckle"
-          style={{ backgroundColor: `${processColor(manipulation)}` }}
+          style={{
+            backgroundColor: `${manipulatedColor.current}`,
+            resize: "horizontal",
+            overflow: "hidden",
+          }}
         >
-          <p>{processColor(manipulation)}</p>
+          <p>{manipulatedColor.current}</p>
         </div>
-        <p style={{ width: "100%" }} className="contrast">
+        {/* <p style={{ width: "100%" }} className="contrast">
           Degree:{" "}
           <span
-            ref={txtDisplay}
+            // ref={displayRange}
             style={{ width: "3ch", display: "inline-block" }}
           >
-            {rangeVal}
+            {rangeValue}
           </span>
-        </p>
-        <p style={{ color: `${processColor(manipulation)}` }}>
+        </p> */}
+        <p style={{ color: `${manipulatedColor.current}` }}>
           Sample text with chosen color displayed here
         </p>
       </div>
