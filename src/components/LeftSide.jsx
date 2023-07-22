@@ -1,6 +1,16 @@
+import { useState } from "react";
+
 const LeftSide = ({ colorValue, setColorValue }) => {
+  const [colorInput, setcolorInput] = useState(colorValue);
+
   function handleColorChange(event) {
-    setColorValue(event.target.value);
+    setcolorInput(event.target.value);
+  }
+
+  function handleColorSubmit(event) {
+    event.preventDefault();
+    // console.log(event.target["color-value"].value);
+    setColorValue(event.target["color-value"].value);
   }
 
   return (
@@ -10,13 +20,16 @@ const LeftSide = ({ colorValue, setColorValue }) => {
           Enter a color:&nbsp;&nbsp;&nbsp;
         </label>
         <br />
-        <input
-          // type="color"
-          name="color-value"
-          id="color-val"
-          value={colorValue}
-          onChange={handleColorChange}
-        />
+        <form onSubmit={handleColorSubmit}>
+          <input
+            // type="color"
+            name="color-value"
+            id="color-val"
+            value={colorInput}
+            onChange={handleColorChange}
+          />
+          <button type="submit" className="btn">Enter</button>
+        </form>
       </div>
       <div className="color-result-box">
         <div

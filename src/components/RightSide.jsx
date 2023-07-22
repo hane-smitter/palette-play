@@ -1,42 +1,68 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, memo } from "react";
 import Color from "color";
+
 import Mixers from "./Mixers";
 
 const RightSide = ({ colorValue, setColorValue }) => {
   const [, triggerRender] = useState(false);
-  const manipulatedColor = useRef(Color(colorValue).hsl().string());
+  const [colorDisplayFormat, setColorDisplayFormat] = useState("hsl");
 
-  const colorUpdater = useCallback((color) => {
-    manipulatedColor.current = color;
-    triggerRender((prev) => !prev);
-  }, []);
+  const manipulatedColor = useRef(Color(colorValue));
+  let colorInView;
+
+  switch (colorDisplayFormat) {
+    case "hex":
+      colorInView = manipulatedColor.current.hex();
+      break;
+    case "rgb":
+      colorInView = manipulatedColor.current.rgb().string();
+      break;
+    case "hsl":
+      colorInView = manipulatedColor.current.hsl().string();
+      break;
+
+    default:
+      colorInView = manipulatedColor.current.hsl().string();
+  }
+
+  const colorUpdater = useCallback(
+    ({ hue, saturation, lightness }) => {
+      manipulatedColor.current = Color({
+        h: hue,
+        s: saturation,
+        l: lightness,
+      });
+      triggerRender((prev) => !prev);
+    },
+    [colorValue]
+  );
+  const setColorFormat = useCallback((format) => {
+    setColorDisplayFormat(format);
+  });
 
   return (
     <div>
       <div className="color-input-box">
         <Mixers colorValue={colorValue} colorUpdater={colorUpdater} />
       </div>
+      <FormatSelection
+        setColorFormat={setColorFormat}
+        colorFormat={colorDisplayFormat}
+      />
       <div className="color-result-box">
         <div
           className="color-result buckle"
           style={{
-            backgroundColor: `${manipulatedColor.current}`,
+            backgroundColor: `${colorInView}`,
             resize: "horizontal",
             overflow: "hidden",
           }}
         >
-          <p>{manipulatedColor.current}</p>
+          <div className="color-result-text-bg">
+            <p className="color-result-text">{colorInView}</p>
+          </div>
         </div>
-        {/* <p style={{ width: "100%" }} className="contrast">
-          Degree:{" "}
-          <span
-            // ref={displayRange}
-            style={{ width: "3ch", display: "inline-block" }}
-          >
-            {rangeValue}
-          </span>
-        </p> */}
-        <p style={{ color: `${manipulatedColor.current}` }}>
+        <p style={{ color: `${colorInView}`, width: "100%" }}>
           Sample text with chosen color displayed here
         </p>
       </div>
@@ -44,4 +70,28 @@ const RightSide = ({ colorValue, setColorValue }) => {
   );
 };
 
-export default RightSide;
+function FormatSelection({ setColorFormat, colorFormat }) {
+  const [selectedFormat, setSelectedFormat] = useState(colorFormat);
+
+  return (
+    <div>
+      <label htmlFor="color-format" style={{ marginRight: 8 }}>
+        Change format:
+      </label>
+      <select
+        id="color-format"
+        onChange={(e) => {
+          setSelectedFormat(e.target.value);
+          setColorFormat(e.target.value);
+        }}
+        value={selectedFormat}
+      >
+        <option value="rgb">rgb</option>
+        <option value="hsl">hsl</option>
+        <option value="hex">hex</option>
+      </select>
+    </div>
+  );
+}
+
+export default memo(RightSide);

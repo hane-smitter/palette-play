@@ -6,6 +6,8 @@ import LeftSide from "./components/LeftSide";
 import RightSide from "./components/RightSide";
 import BgColorPicker from "./components/BgColorChanger";
 
+let rightSideKey = 1;
+
 function App() {
   const [colorValue, setColorValue] = useState("#DC143C");
   const [changeBg, setChangeBg] = useState(false);
@@ -16,6 +18,13 @@ function App() {
   const colorChanger = useCallback(
     (value) => {
       setColorValue(value);
+    },
+    [colorValue]
+  );
+  const newColorPalette = useCallback(
+    (value) => {
+      setColorValue(value);
+      rightSideKey++;
     },
     [colorValue]
   );
@@ -60,11 +69,21 @@ function App() {
       )}
 
       <div className="buckle color-container">
-        <LeftSide colorValue={colorValue} setColorValue={colorChanger} />
-        <RightSide colorValue={colorValue} setColorValue={colorChanger} />
+        <LeftSide colorValue={colorValue} setColorValue={newColorPalette} />
+        <RightSide
+          colorValue={colorValue}
+          setColorValue={colorChanger}
+          key={rightSideKey}
+        />
       </div>
 
-      <footer>
+      <footer
+        style={{
+          marginTop: "20px",
+          backgroundColor: "#8b939a",
+          padding: "2rem 0",
+        }}
+      >
         Made by <a href="https://twitter.com/smitterhane">@smittehane</a>
       </footer>
     </>
