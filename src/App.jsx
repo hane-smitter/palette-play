@@ -9,7 +9,7 @@ import BgColorPicker from "./components/BgColorChanger";
 let rightSideKey = 1;
 
 function App() {
-  const [colorValue, setColorValue] = useState("#DC143C");
+  const [colorValue, setColorValue] = useState("#DC143C"); // #ff63b6
   const [changeBg, setChangeBg] = useState(false);
   const [bgDefaultValue, setBgDefaultValue] = useState(
     () => JSON.parse(localStorage.getItem("bgDefault")) || "#242424"

@@ -21,7 +21,7 @@ function Mixers({ colorValue, colorUpdater }) {
 
   const saturationResult = Math.round(colorHSL.current?.color[1] * 10) / 10;
   const saturation1 = colorHSL.current?.color[1];
-  const saturation2 = Color(colorValue).hsl()?.color[1];
+  const saturation2 = color.hsl()?.color[1];
   const s_calc_divisor = saturation2 || 1; // To avoid Infinity result when saturation is 0
   const s_calculation = (saturation1 - saturation2) / s_calc_divisor;
   const codeSaturation = Math.abs(Math.round(s_calculation * 1000) / 1000);
@@ -34,7 +34,7 @@ function Mixers({ colorValue, colorUpdater }) {
 
   const lightnessResult = Math.round(colorHSL.current?.color[2] * 10) / 10;
   const lightness1 = colorHSL.current?.color[2];
-  const lightness2 = Color(colorValue).hsl()?.color[2];
+  const lightness2 = color.hsl()?.color[2];
   const l_calc_divisor = lightness2 || 1; // To avoid Infinity result when lightness is 0
   const l_calculation = (lightness1 - lightness2) / l_calc_divisor;
   const codeLightness = Math.abs(Math.round(l_calculation * 1000) / 1000);
@@ -53,10 +53,11 @@ function Mixers({ colorValue, colorUpdater }) {
   //   setHueSliderVal(0);
   // }, [colorValue]);
 
-  function handleHueChange(inpValue, direction) {
-    const newValue = inpValue;
+  function handleHueChange(inpValue, absolute = false) {
+    const newValue = Number(inpValue);
 
     const newColorDiff = colorTransform.current.rotate(newValue);
+    console.log({ newColorDiff });
     colorTransform.current = newColorDiff;
 
     colorHSL.current = newColorDiff.hsl();
@@ -75,23 +76,17 @@ function Mixers({ colorValue, colorUpdater }) {
   function handleSaturationChange(event, direction) {
     const ratio = saturationRatio.current;
 
-    if (direction == "plus") {
-      var newColorDiff;
-      colorTransform.current.hsl()?.color[1] == 0
-        ? (newColorDiff = Color({
-            h: colorTransform.current.hsl()?.color[0],
-            s: ratio + 0.6,
-            l: colorTransform.current.hsl()?.color[2],
-          }))
-        : (newColorDiff = colorTransform.current.saturate(ratio));
+    const currentLightness = colorTransform.current.hsl()?.color[1];
+    var newColorDiff;
+    if (currentLightness == 0) {
+      newColorDiff = Color({
+        h: colorTransform.current.hsl()?.color[0],
+        s: 0.7,
+        l: colorTransform.current.hsl()?.color[2],
+      });
     } else {
-      var newColorDiff;
-      colorTransform.current.hsl()?.color[1] == 0
-        ? (newColorDiff = Color({
-            h: colorTransform.current.hsl()?.color[0],
-            s: ratio + 0.6,
-            l: colorTransform.current.hsl()?.color[2],
-          }))
+      direction == "plus"
+        ? (newColorDiff = colorTransform.current.saturate(ratio))
         : (newColorDiff = colorTransform.current.desaturate(ratio));
     }
 
@@ -100,7 +95,7 @@ function Mixers({ colorValue, colorUpdater }) {
     colorHSL.current = newColorDiff.hsl();
     colorUpdater({
       hue: hueResult,
-      saturation: Math.round(newColorDiff.hsl()?.color[1] * 10) / 10, // saturationResult has late updates
+      saturation: Math.round(newColorDiff.hsl()?.color[1] * 10) / 10, // `saturationResult` has late updates
       lightness: lightnessResult,
     });
 
@@ -110,33 +105,28 @@ function Mixers({ colorValue, colorUpdater }) {
   function handleLightnessChange(event, direction) {
     const ratio = lightnessRatio.current;
 
-    if (direction == "plus") {
-      var newColorDiff;
-      colorTransform.current.hsl()?.color[2] == 0
-        ? (newColorDiff = Color({
-            h: colorTransform.current.hsl()?.color[0],
-            s: colorTransform.current.hsl()?.color[1],
-            l: ratio + 0.6,
-          }))
-        : (newColorDiff = colorTransform.current.lighten(ratio));
+    const currentLightness = colorTransform.current.hsl()?.color[2];
+    var newColorDiff;
+    if (currentLightness == 0) {
+      newColorDiff = Color({
+        h: colorTransform.current.hsl()?.color[0],
+        s: colorTransform.current.hsl()?.color[1],
+        l: 0.7,
+      });
     } else {
-      var newColorDiff;
-      colorTransform.current.hsl()?.color[2] == 0
-        ? (newColorDiff = Color({
-            h: colorTransform.current.hsl()?.color[0],
-            s: colorTransform.current.hsl()?.color[1],
-            l: ratio + 0.6,
-          }))
+      direction == "plus"
+        ? (newColorDiff = colorTransform.current.lighten(ratio))
         : (newColorDiff = colorTransform.current.darken(ratio));
     }
 
     colorTransform.current = newColorDiff;
 
     colorHSL.current = newColorDiff.hsl();
+    console.log("colorHSL.current in btn click: ", colorHSL.current);
     colorUpdater({
       hue: hueResult,
       saturation: saturationResult,
-      lightness: Math.round(newColorDiff.hsl()?.color[2] * 10) / 10, //l ightnessResult holds delayed updated value
+      lightness: Math.round(newColorDiff.hsl()?.color[2] * 10) / 10, // `lightnessResult` holds delayed updated value
     });
 
     triggerRender((prev) => !prev); // To update UI
@@ -288,8 +278,9 @@ function Mixers({ colorValue, colorUpdater }) {
                     style={{ fontSize: "10px" }}
                     onClick={(e) => {
                       // colorHSL.current?.color[0] = color.hsl()?.color[0];
-                      const saturation =
-                        Math.round(color.hsl()?.color[1] * 10) / 10;
+                      // const saturation =
+                      //   Math.round(color.hsl()?.color[1] * 10) / 10;
+                      const saturation = color.hsl()?.color[1];
                       const restoreSaturation = [
                         colorHSL.current?.color[0],
                         saturation,
@@ -363,8 +354,9 @@ function Mixers({ colorValue, colorUpdater }) {
                     style={{ fontSize: "10px" }}
                     onClick={(e) => {
                       // colorHSL.current?.color[0] = color.hsl()?.color[0];
-                      const lightness =
-                        Math.round(color.hsl()?.color[2] * 10) / 10;
+                      // const lightness =
+                      //   Math.round(color.hsl()?.color[2] * 10) / 10;
+                      const lightness = color.hsl()?.color[2];
                       const restoreLightness = [
                         colorHSL.current?.color[0],
                         colorHSL.current?.color[1],
