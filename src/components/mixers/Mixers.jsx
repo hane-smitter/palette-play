@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Color from "color";
+import ResultInput from "./ResultInput";
 
 function Mixers({ colorValue, colorUpdater }) {
   const color = new Color(colorValue);
@@ -57,9 +58,8 @@ function Mixers({ colorValue, colorUpdater }) {
     const newValue = Number(inpValue);
 
     const newColorDiff = colorTransform.current.rotate(newValue);
-    console.log({ newColorDiff });
+    // console.log({ newColorDiff });
     colorTransform.current = newColorDiff;
-
     colorHSL.current = newColorDiff.hsl();
     // console.log("NEW Hue Diff color: ", newColorDiff.hsl());
     colorUpdater({
@@ -71,6 +71,38 @@ function Mixers({ colorValue, colorUpdater }) {
     // Math.round(colorHSL.current?.color[0] * 100) / 100
 
     setHueSliderVal(newValue);
+  }
+  function handleHueResultChange(resultValue) {
+    const newValue = Number(resultValue);
+    if (newValue < 0 || newValue > 360) return;
+
+    const newColorDiff = colorTransform.current.hue(newValue);
+
+    let hueSliderDiff = newColorDiff.hsl()?.color[0] - color.hsl()?.color[0];
+    if (hueSliderDiff < 0 || hueSliderDiff > 360) {
+      // To calculate modulous
+      hueSliderDiff = ((hueSliderDiff % 360) + 360) % 360; // ((n % d) + d) % d
+    }
+    const sliderValue = Math.round(hueSliderDiff);
+
+    // console.log("handleHueResultChange called: ", newValue);
+    // console.log("hueSliderDiff: ", hueSliderDiff);
+    // console.log("newDiff1: ", newColorDiff.hsl()?.color[0]);
+    // console.log("color.hsl()2: ", color.hsl()?.color[0]);
+    // console.log(
+    //   "newColorDiff.hsl()?.color[0] - color.hsl()?.color[0]: ",
+    //   newColorDiff.hsl()?.color[0] - color.hsl()?.color[0]
+    // );
+
+    colorTransform.current = newColorDiff;
+    colorHSL.current = newColorDiff.hsl();
+    colorUpdater({
+      hue: Math.round(newColorDiff.hsl()?.color[0] * 100) / 100, // BUG on late update when we use hueResult Variable
+      saturation: saturationResult,
+      lightness: lightnessResult,
+    });
+
+    setHueSliderVal(sliderValue);
   }
 
   function handleSaturationChange(event, direction) {
@@ -179,7 +211,9 @@ function Mixers({ colorValue, colorUpdater }) {
                       -
                     </button>
                     &nbsp; &nbsp; &nbsp;
-                    {hueSliderVal}
+                    <span style={{ width: "3ch", textAlign: "center" }}>
+                      {hueSliderVal}
+                    </span>
                     &nbsp; &nbsp; &nbsp;
                     <button
                       className="btn"
@@ -207,36 +241,20 @@ function Mixers({ colorValue, colorUpdater }) {
                     onClick={(e) => {
                       // colorHSL.current?.color[0] = color.hsl()?.color[0];
                       const hue = Math.round(color.hsl()?.color[0] * 100) / 100;
-                      const restoreHue = [
-                        hue,
-                        colorHSL.current?.color[1],
-                        colorHSL.current?.color[2],
-                      ];
-
-                      colorHSL.current = {
-                        ...color.hsl(),
-                        color: [...restoreHue],
-                      };
-                      colorTransform.current = Color({
-                        h: restoreHue[0],
-                        s: restoreHue[1],
-                        l: restoreHue[2],
-                      });
-
-                      colorUpdater({
-                        hue: restoreHue[0],
-                        saturation: restoreHue[1],
-                        lightness: restoreHue[2],
-                      });
-
-                      // console.log("HUE_Restore:: ", restoreHue);
-                      triggerRender((prev) => !prev);
+                      handleHueResultChange(hue);
                     }}
                   >
                     restore
                   </button>
                 )}
-                <span style={{ fontWeight: 600 }}>&nbsp;{hueResult}</span>
+                <span style={{ fontWeight: 600 }}>
+                  <ResultInput
+                    resultChange={handleHueResultChange}
+                    resultValue={hueResult}
+                    min={0}
+                    max={360}
+                  />
+                </span>
               </td>
             </tr>
             <tr>

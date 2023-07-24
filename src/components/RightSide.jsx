@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, memo } from "react";
 import Color from "color";
 
-import Mixers from "./Mixers";
+import Mixers from "./mixers/Mixers";
 
 const RightSide = ({ colorValue, setColorValue }) => {
   const [, triggerRender] = useState(false);
@@ -15,14 +15,14 @@ const RightSide = ({ colorValue, setColorValue }) => {
       colorInView = manipulatedColor.current.hex();
       break;
     case "rgb":
-      colorInView = manipulatedColor.current.rgb().string();
+      colorInView = manipulatedColor.current.rgb().string(2);
       break;
     case "hsl":
-      colorInView = manipulatedColor.current.hsl().string();
+      colorInView = manipulatedColor.current.hsl().string(2);
       break;
 
     default:
-      colorInView = manipulatedColor.current.hsl().string();
+      colorInView = manipulatedColor.current.hsl().string(2);
   }
 
   const colorUpdater = useCallback(

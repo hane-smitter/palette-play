@@ -66,7 +66,7 @@ body {
     #5b64675b 45%,
     transparent 99%
   );
-  isolation: isolate;
+  /* isolation: isolate; */
 }
 .color-result .color-result-text-bg p {
   font-weight: 900;
@@ -86,6 +86,31 @@ body {
 
 input[type="color"] {
   cursor: pointer;
+}
+input:read-only {
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+input.color-result-input {
+  border: none;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+input.color-result-input:focus {
+  outline: 1.2px solid rgb(27, 27, 190);
+  caret-color: #3b2c2c;
+}
+input.color-result-input:not(:read-only) {
+  background-color: #fdfdfd;
+  color: rgb(37, 37, 37);
+}
+input.color-result-input:not(:placeholder-shown):invalid {
+  outline: 2px solid rgb(219, 18, 11);
+}
+input.color-result-input.has-error {
+  outline: 2px solid rgb(219, 18, 11);
 }
 
 .btn {
