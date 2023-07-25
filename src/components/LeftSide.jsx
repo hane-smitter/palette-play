@@ -1,6 +1,13 @@
 import { useState } from "react";
+import Color from "color";
 
 const LeftSide = ({ colorValue, setColorValue }) => {
+  let color;
+  try {
+    color = new Color(colorValue);
+  } catch (error) {
+    color = new Color("#DC143C");
+  }
   const [colorInput, setcolorInput] = useState(colorValue);
 
   function handleColorChange(event) {
@@ -28,13 +35,15 @@ const LeftSide = ({ colorValue, setColorValue }) => {
             value={colorInput}
             onChange={handleColorChange}
           />
-          <button type="submit" className="btn">Enter</button>
+          <button type="submit" className="btn">
+            Enter
+          </button>
         </form>
       </div>
       <div className="color-result-box">
         <div
           className="color-result buckle"
-          style={{ backgroundColor: `${colorValue}` }}
+          style={{ backgroundColor: `${color.rgb().string()}` }}
         ></div>
       </div>
     </div>

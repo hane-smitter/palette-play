@@ -1,39 +1,43 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Color from "color";
 import ResultInput from "./ResultInput";
 
 function Mixers({ colorValue, colorUpdater }) {
-  const color = new Color(colorValue);
-
-  // console.log({ color });
+  let color;
+  try {
+    color = new Color(colorValue);
+  } catch (error) {
+    color = new Color("#DC143C");
+  }
+  // console.log(
+  //   "Math.round(color.hsl()?.color[0]: ",
+  //   Math.round(color.hsl()?.color[0])
+  // );
 
   const [, triggerRender] = useState(false); // To be used when we need to trigger rerender manually
   const colorTransform = useRef(color);
   const colorHSL = useRef(color.hsl());
-  const [hueSliderVal, setHueSliderVal] = useState(0);
+  const [hueSliderVal, setHueSliderVal] = useState(
+    Math.round(color.hsl()?.color[0])
+  );
   const saturationRatio = useRef(0.1);
   const lightnessRatio = useRef(0.1);
 
-  const hueResult = Math.round(colorHSL.current?.color[0] * 100) / 100;
+  // const hueResult = Math.round(colorHSL.current?.color[0] * 100) / 100;
+  const hueResult = colorHSL.current?.color[0];
   const codeHue =
-    Math.round(
-      (colorHSL.current?.color[0] - Color(colorValue).hsl()?.color[0]) * 1000
-    ) / 1000;
+    Math.round((colorHSL.current?.color[0] - color.hsl()?.color[0]) * 1000) /
+    1000;
 
-  const saturationResult = Math.round(colorHSL.current?.color[1] * 10) / 10;
+  // const saturationResult = Math.round(colorHSL.current?.color[1] * 100) / 100;
+  const saturationResult = colorHSL.current?.color[1];
   const saturation1 = colorHSL.current?.color[1];
   const saturation2 = color.hsl()?.color[1];
   const s_calc_divisor = saturation2 || 1; // To avoid Infinity result when saturation is 0
   const s_calculation = (saturation1 - saturation2) / s_calc_divisor;
   const codeSaturation = Math.abs(Math.round(s_calculation * 1000) / 1000);
-  // console.log(
-  //   "codeSaturation %d:: S1:%d S2:%d",
-  //   codeSaturation,
-  //   saturation1,
-  //   saturation2
-  // );
 
-  const lightnessResult = Math.round(colorHSL.current?.color[2] * 10) / 10;
+  const lightnessResult = colorHSL.current?.color[2];
   const lightness1 = colorHSL.current?.color[2];
   const lightness2 = color.hsl()?.color[2];
   const l_calc_divisor = lightness2 || 1; // To avoid Infinity result when lightness is 0
@@ -41,69 +45,55 @@ function Mixers({ colorValue, colorUpdater }) {
   const codeLightness = Math.abs(Math.round(l_calculation * 1000) / 1000);
 
   // useEffect(() => {
-  //   console.log("Colorvalue HAS CHANGED!!: ", color);
-  //   colorTransform.current = color;
-  //   colorHSL.current = color.hsl();
+  //   // This effect serves to set initial value of slider from `hueResult`,
+  //   // which overides what child(`ResultInput`) effect sets with improper number precision
+  //   hueResultChange(hueResult);
+  // }, []);
 
-  //   colorUpdater({
-  //     hue: Math.round(color.hsl()?.color[0] * 100) / 100,
-  //     saturation: Math.round(color.hsl()?.color[1] * 10) / 10,
-  //     lightness: Math.round(color.hsl()?.color[2] * 10) / 10,
-  //   });
-
-  //   setHueSliderVal(0);
-  // }, [colorValue]);
-
-  function handleHueChange(inpValue, absolute = false) {
+  function handleHueChange(inpValue) {
     const newValue = Number(inpValue);
 
-    const newColorDiff = colorTransform.current.rotate(newValue);
-    // console.log({ newColorDiff });
+    const newColorDiff = colorTransform.current.hue(newValue);
     colorTransform.current = newColorDiff;
     colorHSL.current = newColorDiff.hsl();
-    // console.log("NEW Hue Diff color: ", newColorDiff.hsl());
     colorUpdater({
-      hue: Math.round(newColorDiff.hsl()?.color[0] * 100) / 100, // BUG on late update when we use hueResult Variable
-      saturation: saturationResult,
-      lightness: lightnessResult,
+      hue: newColorDiff.hsl()?.color[0], // BUG on late update when we use hueResult Variable
+      saturation: newColorDiff.hsl()?.color[1],
+      lightness: newColorDiff.hsl()?.color[2],
     });
-
-    // Math.round(colorHSL.current?.color[0] * 100) / 100
 
     setHueSliderVal(newValue);
   }
-  function handleHueResultChange(resultValue) {
+  const hueResultChange = useCallback(function (resultValue) {
     const newValue = Number(resultValue);
     if (newValue < 0 || newValue > 360) return;
 
     const newColorDiff = colorTransform.current.hue(newValue);
 
-    let hueSliderDiff = newColorDiff.hsl()?.color[0] - color.hsl()?.color[0];
-    if (hueSliderDiff < 0 || hueSliderDiff > 360) {
-      // To calculate modulous
-      hueSliderDiff = ((hueSliderDiff % 360) + 360) % 360; // ((n % d) + d) % d
-    }
-    const sliderValue = Math.round(hueSliderDiff);
+    let hueSliderDiff = newColorDiff.hsl()?.color[0];
 
-    // console.log("handleHueResultChange called: ", newValue);
-    // console.log("hueSliderDiff: ", hueSliderDiff);
-    // console.log("newDiff1: ", newColorDiff.hsl()?.color[0]);
-    // console.log("color.hsl()2: ", color.hsl()?.color[0]);
-    // console.log(
-    //   "newColorDiff.hsl()?.color[0] - color.hsl()?.color[0]: ",
-    //   newColorDiff.hsl()?.color[0] - color.hsl()?.color[0]
-    // );
+    /* This commented code applies if we `.rotate()` color to get an = representation on a slider */
+    // let hueSliderDiff = newColorDiff.hsl()?.color[0] - color.hsl()?.color[0];
+    // if (hueSliderDiff < 0 || hueSliderDiff > 360) {
+    //   // To calculate modulous: ((n % d) + d) % d
+    //   hueSliderDiff = ((hueSliderDiff % 360) + 360) % 360;
+    // }
+
+    const sliderValue = Math.round(hueSliderDiff);
 
     colorTransform.current = newColorDiff;
     colorHSL.current = newColorDiff.hsl();
     colorUpdater({
-      hue: Math.round(newColorDiff.hsl()?.color[0] * 100) / 100, // BUG on late update when we use hueResult Variable
-      saturation: saturationResult,
-      lightness: lightnessResult,
+      hue: newColorDiff.hsl()?.color[0], // BUG on late update when we use hueResult Variable
+      saturation: newColorDiff.hsl()?.color[1],
+      lightness: newColorDiff.hsl()?.color[2],
     });
 
     setHueSliderVal(sliderValue);
-  }
+    // Above Hue setState won't rerender UI if clicked button rounds off and arrives at initial color hue
+    // So we ensure rerender is triggered to update the useRefs in the UI
+    triggerRender((prev) => !prev);
+  }, []);
 
   function handleSaturationChange(event, direction) {
     const ratio = saturationRatio.current;
@@ -123,16 +113,31 @@ function Mixers({ colorValue, colorUpdater }) {
     }
 
     colorTransform.current = newColorDiff;
-
     colorHSL.current = newColorDiff.hsl();
     colorUpdater({
-      hue: hueResult,
-      saturation: Math.round(newColorDiff.hsl()?.color[1] * 10) / 10, // `saturationResult` has late updates
-      lightness: lightnessResult,
+      hue: newColorDiff.hsl()?.color[0],
+      saturation: newColorDiff.hsl()?.color[1], // `saturationResult` has late updates
+      lightness: newColorDiff.hsl()?.color[2],
     });
 
     triggerRender((prev) => !prev); // To update UI
   }
+  const saturationResultChange = useCallback(function (resultValue) {
+    const newValue = Number(resultValue);
+    if (newValue < 0 || newValue > 100) return;
+
+    const newColorDiff = colorTransform.current.saturationl(newValue);
+
+    colorTransform.current = newColorDiff;
+    colorHSL.current = newColorDiff.hsl();
+    colorUpdater({
+      hue: newColorDiff.hsl()?.color[0],
+      saturation: newColorDiff.hsl()?.color[1], // `saturationResult` has late updates
+      lightness: newColorDiff.hsl()?.color[2],
+    });
+
+    triggerRender((prev) => !prev);
+  }, []);
 
   function handleLightnessChange(event, direction) {
     const ratio = lightnessRatio.current;
@@ -152,16 +157,30 @@ function Mixers({ colorValue, colorUpdater }) {
     }
 
     colorTransform.current = newColorDiff;
-
     colorHSL.current = newColorDiff.hsl();
-    console.log("colorHSL.current in btn click: ", colorHSL.current);
     colorUpdater({
-      hue: hueResult,
-      saturation: saturationResult,
-      lightness: Math.round(newColorDiff.hsl()?.color[2] * 10) / 10, // `lightnessResult` holds delayed updated value
+      hue: newColorDiff.hsl()?.color[0],
+      saturation: newColorDiff.hsl()?.color[1],
+      lightness: newColorDiff.hsl()?.color[2], // `lightnessResult` holds delayed updated value
     });
 
     triggerRender((prev) => !prev); // To update UI
+  }
+  function lightnessResultChange(resultValue) {
+    const newValue = Number(resultValue);
+    if (newValue < 0 || newValue > 100) return;
+
+    const newColorDiff = colorTransform.current.lightness(newValue);
+
+    colorTransform.current = newColorDiff;
+    colorHSL.current = newColorDiff.hsl();
+    colorUpdater({
+      hue: newColorDiff.hsl()?.color[0],
+      saturation: newColorDiff.hsl()?.color[1],
+      lightness: newColorDiff.hsl()?.color[2],
+    });
+
+    triggerRender((prev) => !prev);
   }
 
   return (
@@ -206,12 +225,18 @@ function Mixers({ colorValue, colorUpdater }) {
                           "minus"
                         )
                       }
-                      disabled={hueSliderVal <= 0}
+                      disabled={Number(hueSliderVal) <= 0}
                     >
                       -
                     </button>
                     &nbsp; &nbsp; &nbsp;
-                    <span style={{ width: "3ch", textAlign: "center" }}>
+                    <span
+                      style={{
+                        width: "3ch",
+                        textAlign: "center",
+                        fontSize: "13px",
+                      }}
+                    >
                       {hueSliderVal}
                     </span>
                     &nbsp; &nbsp; &nbsp;
@@ -225,7 +250,7 @@ function Mixers({ colorValue, colorUpdater }) {
                           "plus"
                         )
                       }
-                      disabled={hueSliderVal >= 360}
+                      disabled={Number(hueSliderVal) >= 360}
                     >
                       +
                     </button>
@@ -237,11 +262,12 @@ function Mixers({ colorValue, colorUpdater }) {
                   Math.round(color.hsl()?.color[0] * 100) / 100 && (
                   <button
                     className="btn restore-btn"
+                    title="Restores to initial"
                     style={{ fontSize: "10px" }}
                     onClick={(e) => {
-                      // colorHSL.current?.color[0] = color.hsl()?.color[0];
-                      const hue = Math.round(color.hsl()?.color[0] * 100) / 100;
-                      handleHueResultChange(hue);
+                      const hue = color.hsl()?.color[0]; // Not rounding
+                      // console.log("hue restore : ", hue);
+                      hueResultChange(hue);
                     }}
                   >
                     restore
@@ -249,7 +275,7 @@ function Mixers({ colorValue, colorUpdater }) {
                 )}
                 <span style={{ fontWeight: 600 }}>
                   <ResultInput
-                    resultChange={handleHueResultChange}
+                    resultChange={hueResultChange}
                     resultValue={hueResult}
                     min={0}
                     max={360}
@@ -289,47 +315,27 @@ function Mixers({ colorValue, colorUpdater }) {
                 </span>
               </td>
               <td style={{ position: "relative" }}>
-                {Math.round(colorHSL.current?.color[1] * 10) / 10 !==
-                  Math.round(color.hsl()?.color[1] * 10) / 10 && (
+                {Math.round(colorHSL.current?.color[1] * 100) / 100 !==
+                  Math.round(color.hsl()?.color[1] * 100) / 100 && (
                   <button
                     className="btn restore-btn"
+                    title="Restores to initial"
                     style={{ fontSize: "10px" }}
                     onClick={(e) => {
-                      // colorHSL.current?.color[0] = color.hsl()?.color[0];
-                      // const saturation =
-                      //   Math.round(color.hsl()?.color[1] * 10) / 10;
-                      const saturation = color.hsl()?.color[1];
-                      const restoreSaturation = [
-                        colorHSL.current?.color[0],
-                        saturation,
-                        colorHSL.current?.color[2],
-                      ];
-
-                      colorHSL.current = {
-                        ...color.hsl(),
-                        color: [...restoreSaturation],
-                      };
-                      colorTransform.current = Color({
-                        h: restoreSaturation[0],
-                        s: restoreSaturation[1],
-                        l: restoreSaturation[2],
-                      });
-
-                      colorUpdater({
-                        hue: restoreSaturation[0],
-                        saturation: restoreSaturation[1],
-                        lightness: restoreSaturation[2],
-                      });
-
-                      // console.log("SATURATION_Restore:: ", restoreSaturation);
-                      triggerRender((prev) => !prev);
+                      const saturation = color.hsl()?.color[1]; // Not rounding
+                      saturationResultChange(saturation);
                     }}
                   >
                     restore
                   </button>
                 )}
                 <span style={{ fontWeight: 600 }}>
-                  &nbsp;{saturationResult}
+                  <ResultInput
+                    resultChange={saturationResultChange}
+                    resultValue={saturationResult}
+                    min={0}
+                    max={100}
+                  />
                 </span>
               </td>
             </tr>
@@ -365,46 +371,28 @@ function Mixers({ colorValue, colorUpdater }) {
                 </span>
               </td>
               <td style={{ position: "relative" }}>
-                {Math.round(colorHSL.current?.color[2] * 10) / 10 !==
-                  Math.round(color.hsl()?.color[2] * 10) / 10 && (
+                {Math.round(colorHSL.current?.color[2] * 100) / 100 !==
+                  Math.round(color.hsl()?.color[2] * 100) / 100 && (
                   <button
                     className="btn restore-btn"
+                    title="Restores to initial"
                     style={{ fontSize: "10px" }}
                     onClick={(e) => {
-                      // colorHSL.current?.color[0] = color.hsl()?.color[0];
-                      // const lightness =
-                      //   Math.round(color.hsl()?.color[2] * 10) / 10;
-                      const lightness = color.hsl()?.color[2];
-                      const restoreLightness = [
-                        colorHSL.current?.color[0],
-                        colorHSL.current?.color[1],
-                        lightness,
-                      ];
-
-                      colorHSL.current = {
-                        ...color.hsl(),
-                        color: [...restoreLightness],
-                      };
-                      colorTransform.current = Color({
-                        h: restoreLightness[0],
-                        s: restoreLightness[1],
-                        l: restoreLightness[2],
-                      });
-
-                      colorUpdater({
-                        hue: restoreLightness[0],
-                        saturation: restoreLightness[1],
-                        lightness: restoreLightness[2],
-                      });
-
-                      // console.log("LIGHTNESS_Restore:: ", restoreLightness);
-                      triggerRender((prev) => !prev);
+                      const lightness = color.hsl()?.color[2]; // Not rounding off
+                      lightnessResultChange(lightness);
                     }}
                   >
                     restore
                   </button>
                 )}
-                <span style={{ fontWeight: 600 }}>&nbsp;{lightnessResult}</span>
+                <span>
+                  <ResultInput
+                    resultChange={lightnessResultChange}
+                    resultValue={lightnessResult}
+                    min={0}
+                    max={100}
+                  />
+                </span>
               </td>
             </tr>
           </tbody>
@@ -424,15 +412,13 @@ function Mixers({ colorValue, colorUpdater }) {
                   {`color.rotate(${codeHue})`}
                   <wbr />
                   {`.${
-                    colorHSL.current?.color[1] >=
-                    Color(colorValue).hsl()?.color[1]
+                    colorHSL.current?.color[1] >= color.hsl()?.color[1]
                       ? "saturate"
                       : "desaturate"
                   }(${codeSaturation})`}
                   <wbr />
                   {`.${
-                    colorHSL.current?.color[2] >=
-                    Color(colorValue).hsl()?.color[2]
+                    colorHSL.current?.color[2] >= color.hsl()?.color[2]
                       ? "lighten"
                       : "darken"
                   }(${codeLightness})`}

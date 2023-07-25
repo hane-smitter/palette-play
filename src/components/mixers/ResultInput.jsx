@@ -1,8 +1,10 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, memo } from "react";
 
 function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
+  const formattedValue = Math.round(Number(resultValue) * 100) / 100;
+
   const [inpDisabled, setInpDisabled] = useState(true);
-  const [inputValue, setInputValue] = useState(Number(resultValue));
+  const [inputValue, setInputValue] = useState(formattedValue);
   const [triggerSubmission, setTriggerSubmission] = useState(false);
   const inputElem = useRef(null);
 
@@ -12,6 +14,8 @@ function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
   }
   function inpSubmit(event) {
     event?.preventDefault();
+
+    // console.log("event.target.value: ", event.target);
 
     if (inputElem.current) {
       const isValid = checkValid(inputElem.current);
@@ -75,9 +79,9 @@ function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
   }, []);
 
   useEffect(() => {
-    setInputValue(resultValue);
+    setInputValue(formattedValue);
     checkValid(inputElem.current);
-  }, [resultValue]);
+  }, [formattedValue]);
 
   useEffect(() => {
     inpSubmit();
@@ -100,4 +104,4 @@ function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
   );
 }
 
-export default ResultInput;
+export default memo(ResultInput);

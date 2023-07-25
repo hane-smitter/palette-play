@@ -7,7 +7,14 @@ const RightSide = ({ colorValue, setColorValue }) => {
   const [, triggerRender] = useState(false);
   const [colorDisplayFormat, setColorDisplayFormat] = useState("hsl");
 
-  const manipulatedColor = useRef(Color(colorValue));
+  let color;
+  try {
+    color = new Color(colorValue);
+  } catch (error) {
+    color = new Color("#DC143C");
+  }
+
+  const manipulatedColor = useRef(color);
   let colorInView;
 
   switch (colorDisplayFormat) {

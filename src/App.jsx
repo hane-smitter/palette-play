@@ -17,12 +17,14 @@ function App() {
 
   const colorChanger = useCallback(
     (value) => {
-      setColorValue(value);
+      value = String(value).toLowerCase();
+      setColorValue();
     },
     [colorValue]
   );
   const newColorPalette = useCallback(
     (value) => {
+      value = String(value).toLowerCase();
       setColorValue(value);
       rightSideKey++;
     },
