@@ -1,9 +1,11 @@
 import { useRef, useState, useEffect, memo } from "react";
+import Tooltip from "@mui/material/Tooltip";
 
 function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
   const formattedValue = Math.round(Number(resultValue) * 100) / 100;
 
   const [inpDisabled, setInpDisabled] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
   const [inputValue, setInputValue] = useState(formattedValue);
   const [triggerSubmission, setTriggerSubmission] = useState(false);
   const inputElem = useRef(null);
@@ -33,6 +35,7 @@ function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
   function checkValid(element) {
     let valid = true;
     if (element) {
+      setErrorMsg(element.validationMessage);
       const noError = element.checkValidity();
       valid = noError;
       // console.log({ noError });
@@ -88,18 +91,24 @@ function ResultInput({ resultChange, resultValue, max = 100, min = 0 }) {
   }, [triggerSubmission]);
 
   return (
-    <form onSubmit={inpSubmit} style={{ margin: 0 }}>
-      <input
-        ref={inputElem}
-        type="number"
-        readOnly={inpDisabled}
-        value={inputValue}
-        max={max}
-        min={min}
-        step={0.01}
-        onChange={handleInpChange}
-        className="color-result-input"
-      />
+    <form
+      onSubmit={inpSubmit}
+      style={{ margin: 0 }}
+      title={!errorMsg ? "Double click to enter a final result" : ""}
+    >
+      <Tooltip arrow title={errorMsg}>
+        <input
+          ref={inputElem}
+          type="number"
+          readOnly={inpDisabled}
+          value={inputValue}
+          max={max}
+          min={min}
+          step={0.01}
+          onChange={handleInpChange}
+          className="color-result-input"
+        />
+      </Tooltip>
     </form>
   );
 }

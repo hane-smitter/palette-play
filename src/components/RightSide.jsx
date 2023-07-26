@@ -32,7 +32,7 @@ const RightSide = ({ colorValue, setColorValue }) => {
       colorInView = manipulatedColor.current.hsl().string(2);
   }
 
-  const colorUpdater = useCallback(
+  const colorDisplay = useCallback(
     ({ hue, saturation, lightness }) => {
       manipulatedColor.current = Color({
         h: hue,
@@ -50,7 +50,7 @@ const RightSide = ({ colorValue, setColorValue }) => {
   return (
     <div>
       <div className="color-input-box">
-        <Mixers colorValue={colorValue} colorUpdater={colorUpdater} />
+        <Mixers colorValue={colorValue} colorDisplay={colorDisplay} />
       </div>
       <FormatSelection
         setColorFormat={setColorFormat}
