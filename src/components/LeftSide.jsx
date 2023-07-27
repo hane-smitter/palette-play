@@ -23,9 +23,7 @@ const LeftSide = ({ colorValue, setColorValue }) => {
   return (
     <div>
       <div className="color-input-box">
-        <label htmlFor="color-val" className="contrast">
-          Enter a color:&nbsp;&nbsp;&nbsp;
-        </label>
+        <label htmlFor="color-val">Enter a color:&nbsp;&nbsp;&nbsp;</label>
         <br />
         <form onSubmit={handleColorSubmit}>
           <input

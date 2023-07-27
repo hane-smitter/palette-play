@@ -18,7 +18,7 @@ function BgColorPicker({ setChangeBg, handleChangeBg, bgDefaultValue }) {
       }}
     >
       <div style={{ width: "100%" }}>
-        <Tooltip title="close">
+        <Tooltip title="close" arrow>
           <IconButton
             onClick={() => setChangeBg(false)}
             className="contrast"
@@ -29,9 +29,7 @@ function BgColorPicker({ setChangeBg, handleChangeBg, bgDefaultValue }) {
         </Tooltip>
       </div>
       <div>
-        <label htmlFor="choose-color" className="contrast">
-          Choose background
-        </label>
+        <label htmlFor="choose-color">Tap to pick background</label>
         <span>&nbsp;👉️</span>&nbsp;&nbsp;&nbsp;
         <input
           type="color"
@@ -39,6 +37,10 @@ function BgColorPicker({ setChangeBg, handleChangeBg, bgDefaultValue }) {
           id="choose-color"
           defaultValue={bgDefaultValue}
           ref={colorInp}
+          style={{
+            border: "2.2px solid var(--txt-color)",
+            borderRadius: "5px",
+          }}
         />
       </div>
     </div>

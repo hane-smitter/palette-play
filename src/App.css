@@ -1,9 +1,16 @@
+html {
+  --bg-color: Canvas;
+  --txt-color: CanvasText;
+
+  color-scheme: light dark;
+}
 html,
 body {
-  background-color: #242424;
   width: 100%;
   min-height: 100%;
   margin: 0;
+  background-color: var(--bg-color);
+  color: var(--txt-color);
 }
 
 #root {
@@ -62,19 +69,19 @@ body {
 .color-result .color-result-text-bg {
   background-image: linear-gradient(
     90deg,
-    transparent 2%,
+    #5b64671a 2%,
     #5b64675b 45%,
-    transparent 99%
+    #5b646736 99%
   );
-  /* isolation: isolate; */
+  isolation: isolate;
 }
 .color-result .color-result-text-bg p {
   font-weight: 900;
   margin: 0;
   letter-spacing: 1.1px;
   text-transform: lowercase;
-  mix-blend-mode: difference;
-  text-shadow: 0 1px #5b64675b;
+  text-shadow: 0.6px 1.4px var(--text-shadow, #5b64675b);
+  user-select: all;
 
   padding: 5px 10px;
   font-size: 15px;
@@ -98,6 +105,7 @@ input.color-result-input {
   font-size: 16px;
   font-weight: 600;
   width: 100%;
+  color: var(--txt-color);
 }
 input.color-result-input:focus {
   outline: 1.2px solid rgb(27, 27, 190);
